@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Random;
 import java.util.RandomAccess;
 import java.util.stream.Stream;
 
@@ -20,6 +21,7 @@ public class DataService {
 	@Value("${bash.file.url}")
 	private URI fileUrl;
 	private List<String> quotesArrayList;
+	private final Random random = new Random();
 
 	@PostConstruct
 	private void init() throws Exception {
@@ -46,5 +48,9 @@ public class DataService {
 		} catch (ArrayIndexOutOfBoundsException e) {
 			return "столько нету";
 		}
+	}
+
+	public String getRandom() {
+		return getByRank(random.nextInt(1, quotesArrayList.size() + 1));
 	}
 }
