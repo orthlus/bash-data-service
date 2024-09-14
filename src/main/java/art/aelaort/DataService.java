@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
-import java.util.Comparator;
 import java.util.List;
 import java.util.RandomAccess;
 import java.util.stream.Stream;
@@ -27,7 +26,7 @@ public class DataService {
 		Quote[] quotes = jacksonObjectMapper.readValue(fileUrl.toURL(), Quote[].class);
 
 		quotesArrayList = Stream.of(quotes)
-				.sorted(Comparator.comparing(Quote::getRating))
+				.sorted((o1, o2) -> Integer.compare(o2.getRating(), o1.getRating()))
 				.map(Quote::getText)
 				.toList();
 
@@ -39,6 +38,10 @@ public class DataService {
 	}
 
 	public String getByRank(int rank) {
-		return quotesArrayList.get(rank);
+		try {
+			return quotesArrayList.get(rank);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			return "столько нету";
+		}
 	}
 }
