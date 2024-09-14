@@ -38,8 +38,11 @@ public class DataService {
 	}
 
 	public String getByRank(int rank) {
+		if (rank < 1) {
+			return "нужен положительный номер!";
+		}
 		try {
-			return quotesArrayList.get(rank);
+			return quotesArrayList.get(rank - 1);
 		} catch (ArrayIndexOutOfBoundsException e) {
 			return "столько нету";
 		}
