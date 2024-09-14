@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
-import java.util.Collection;
-import java.util.TreeMap;
+import java.util.Comparator;
+import java.util.List;
+import java.util.RandomAccess;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -18,22 +20,25 @@ public class DataService {
 	private final ObjectMapper jacksonObjectMapper;
 	@Value("${bash.file.url}")
 	private URI fileUrl;
-	private final TreeMap<Integer, String> quotesMap = new TreeMap<>();
+	private List<String> quotesArrayList;
 
 	@PostConstruct
 	private void init() throws Exception {
 		Quote[] quotes = jacksonObjectMapper.readValue(fileUrl.toURL(), Quote[].class);
-		for (Quote quote : quotes) {
-			quotesMap.put(quote.getRating(), quote.getText());
+
+		quotesArrayList = Stream.of(quotes)
+				.sorted(Comparator.comparing(Quote::getRating))
+				.map(Quote::getText)
+				.toList();
+
+		if (!(quotesArrayList instanceof RandomAccess)) {
+			throw new RuntimeException("wrong implementation list for quotes");
 		}
+
 		log.info("quotes loaded, size - {}", quotes.length);
 	}
 
 	public String getByRank(int rank) {
-		Collection<String> values = quotesMap.values();
-		return values.stream()
-				.skip(values.size() - rank)
-				.findFirst()
-				.orElseThrow();
+		return quotesArrayList.get(rank);
 	}
 }
